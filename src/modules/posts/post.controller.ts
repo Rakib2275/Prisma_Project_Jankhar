@@ -4,6 +4,7 @@ import { postService } from "./post.service";
 import httpStatus from "http-status"
 import { sendResponse } from "../../utils/sendResponse";
 import { prisma } from "../../lib/prisma";
+import { send } from "node:process";
 
 const createPost = catchAsync(async(req: Request,res:Response,next:NextFunction)=>{
     const id = req.user?.id;
@@ -104,7 +105,14 @@ const deletePost = catchAsync(async(req: Request,res:Response,next:NextFunction)
 })
 
 const getPostsStatus = catchAsync(async(req: Request,res:Response,next:NextFunction)=>{
+    const result = await postService.getPostsStatus();
 
+    sendResponse(res,{
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Post stats retrive successfully",
+        data : result
+    })
 })
 
 

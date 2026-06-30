@@ -12,6 +12,7 @@ enum PostStatus {
   DRAFT
   PUBLISHED
   ACTIVED
+  ARCHIVED
 }
 
 enum CommentStatus {
