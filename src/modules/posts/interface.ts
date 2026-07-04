@@ -17,3 +17,14 @@ export interface IUpdatePostPayload {
     status ?: PostStatus;
     tags ?: string[]
 }
+
+export interface IPostQuery extends IUpdatePostPayload{
+  title ?: string
+  content ?: string
+  searchTerm ?: string
+  page ?: string
+  limit ?: string
+  sortOrder ?: string
+  sortBy ?: string
+  authorId ?: string
+}

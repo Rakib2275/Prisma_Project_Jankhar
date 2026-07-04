@@ -1,6 +1,9 @@
+import { ADDRCONFIG } from "node:dns";
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload, IUpdatePostPayload } from "./interface";
+import { ICreatePostPayload, IPostQuery, IUpdatePostPayload } from "./interface";
+
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
   const result = await prisma.post.create({
@@ -12,8 +15,132 @@ const createPost = async (payload: ICreatePostPayload, userId: string) => {
   return result;
 };
 
-const getAllPosts = async () => {
+
+const getAllPosts = async (query : IPostQuery) => {
+  const limit = query.limit ? Number(query.limit) : 10;
+  const page = query.page ? Number(query.page) : 1;
+  const skip = (page -1) * limit;
+  const sortBy = query.sortBy ? query.sortBy : "createdAt";
+  const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
+
+  const andConditions : PostWhereInput[] = []
+
+  if(query.searchTerm){
+    andConditions.push({
+      OR : [
+            {
+              title : {
+                contains : query.searchTerm,
+                mode : "insensitive"
+              }
+            },
+            {
+              content : {
+                contains : query.searchTerm,
+                mode : "insensitive"
+              }
+            }
+          ]
+    })
+    
+  }
+  if(query.title){
+    andConditions.push({
+      title : query.title
+    })
+  }
+  if(query.content){
+    andConditions.push({
+      content : query.content
+    })
+  }
+  if(query.authorId){
+    andConditions.push({
+      authorId : query.authorId
+    })
+  }
+  if(query.tags){
+    andConditions.push({
+      tags : {
+        hasSome : query.tags as string[]
+      }
+    })
+  }
+      if(query.status) {
+        andConditions.push({
+            status: query.status
+        })
+    }
+
   const posts = await prisma.post.findMany({
+    //searching / partial match
+
+    // where : {
+    //   title : "My Fourth Post"
+    // },
+    // where : {
+    //   title : {
+    //     contains : "ronaldo",
+    //     mode : "insensitive"
+    //   },
+    //   content : {
+    //     contains : "Ronaldo"
+    //   }
+    // },
+
+    //combining search and filtering
+    // where : {
+    //   AND : [
+    //     {
+    //       OR : [
+    //         {
+    //           title : {
+    //             contains : "Ron",
+    //             mode : "insensitive"
+    //           }
+    //         },
+    //         {
+    //           content : {
+    //             contains : "Ron",
+    //             mode : "insensitive"
+    //           }
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       title : "Ronaldo Najario"
+    //     },
+    //     {
+    //       content : "Ronaldo"
+    //     }
+
+    //   ]
+    // },
+    //take : 1,
+    // skip : 1,
+    // skip : 2,
+    //skip : 3,
+
+    // orderBy : {
+    //   createdAt : "desc",
+    //   title : "asc",
+    //   content : "desc"
+    // },
+    where : {
+      AND : andConditions
+    },
+
+    // where : {
+    //   AND : andConditions
+    // },
+
+    take : limit,
+    skip : skip,
+
+    orderBy : {
+      [sortBy] : sortOrder
+    },
     include: {
       author: {
         omit: {
