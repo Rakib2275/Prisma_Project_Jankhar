@@ -12,12 +12,7 @@ router.post(
 );
 
 router.get(
-    "/author/:authorId",
-    commentController.getCommentByAuthorId
-);
-
-router.get(
-    "/:postId",
+    "/:commentId",
     commentController.getCommentByPostId
 );
 

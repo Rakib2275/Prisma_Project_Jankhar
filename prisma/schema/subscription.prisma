@@ -10,6 +10,7 @@ model Subscription {
     //stripe related ids
 
     //stripe customer id
+    stripeCustomerId String @unique
     //stripe subscription id
 
     createdAt DateTime @default(now())
